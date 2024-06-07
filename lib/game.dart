@@ -1,4 +1,5 @@
 import 'package:angs_2048/components/button.dart';
+import 'package:angs_2048/components/empty_board.dart';
 import 'package:angs_2048/components/score_board.dart';
 import 'package:angs_2048/const/colors.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,9 @@ class Game extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -63,14 +66,20 @@ class Game extends StatelessWidget {
                             ButtonWidget(
                               onPressed: () {},
                               icon: Icons.refresh,
-                            )
+                            ),
                           ],
-                        )
+                        ),
                       ],
                     )
                   ],
                 ),
               ),
+              SizedBox(
+                height: 32.0,
+              ),
+              Stack(
+                children: [EmptyBoardWidget()],
+              )
             ],
           ),
         ),
