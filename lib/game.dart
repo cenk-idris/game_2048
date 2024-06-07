@@ -1,3 +1,4 @@
+import 'package:angs_2048/components/button.dart';
 import 'package:angs_2048/components/score_board.dart';
 import 'package:angs_2048/const/colors.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +53,17 @@ class Game extends StatelessWidget {
                         ),
                         Row(
                           children: [
-                            //TODO: Add the Undo button and NewGame button
+                            ButtonWidget(
+                              onPressed: () {},
+                              icon: Icons.undo,
+                            ),
+                            SizedBox(
+                              width: 16.0,
+                            ),
+                            ButtonWidget(
+                              onPressed: () {},
+                              icon: Icons.refresh,
+                            )
                           ],
                         )
                       ],
