@@ -30,27 +30,22 @@ class EmptyBoardWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(6.0),
       ),
       child: Stack(
-        children: List.generate(16, (i) {
-          // Render the empty board in 4x4 GridView
-          var x = ((i + 1) / 4).ceil();
-          var y = x - 1;
-
-          var top = y * (tileSize) + (x * 12.0);
-          var z = (i - (4 * y));
-          var left = z * (tileSize) + ((z + 1) * 12.0);
-
-          return Positioned(
-            top: top,
-            left: left,
-            child: Container(
-              width: tileSize,
-              height: tileSize,
-              decoration: BoxDecoration(
-                  color: emptyTileColor,
-                  borderRadius: BorderRadius.circular(6.0)),
-            ),
-          );
-        }),
+        children: [
+          for (int row = 0; row < 4; row++)
+            for (int col = 0; col < 4; col++)
+              Positioned(
+                top: row * tileSize + (row + 1) * 12.0,
+                left: col * tileSize + (col + 1) * 12.0,
+                child: Container(
+                  width: tileSize,
+                  height: tileSize,
+                  decoration: BoxDecoration(
+                    color: emptyTileColor,
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                ),
+              )
+        ],
       ),
     );
   }
