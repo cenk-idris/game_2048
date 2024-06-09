@@ -11,8 +11,7 @@ import 'board_state.dart';
 class BoardBloc extends Bloc<BoardEvent, BoardState> {
   // We will use this list to retrieve the right index when user swipes up/down
   // which will allow us to reuse most of the logic.
-  final verticalOrder =
-      [12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3].reversed.toList();
+  final verticalOrder = [12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3];
 
   BoardBloc() : super(BoardState(Board.newGame(best: 0, tiles: []))) {
     on<StartNewGame>(_onStartNewGame);
@@ -34,11 +33,15 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
     // Implement move logic here
     List<Tile> movedList = move(event.direction);
     Board updatedBoard = state.board.copyWith(tiles: movedList);
-    print(
-        '${state.board.tiles.first.index} - ${state.board.tiles.first.nextIndex}');
+    for (var tile in state.board.tiles) {
+      print('${tile.index} - ${tile.nextIndex}');
+    }
+
     emit(BoardState(updatedBoard));
-    print(
-        '${state.board.tiles.first.index} - ${state.board.tiles.first.nextIndex}');
+    for (var tile in state.board.tiles) {
+      print('${tile.index} - ${tile.nextIndex}');
+    }
+    add(MergeTiles());
   }
 
   void _onMergeTiles(MergeTiles event, Emitter<BoardState> emit) {
@@ -53,13 +56,15 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
     var score = state.board.score;
 
     for (int i = 0, l = state.board.tiles.length; i < l; i++) {
-      final tile = state.board.tiles[i];
+      var tile = state.board.tiles[i];
 
       var value = tile.value, merged = false;
 
       if (i + 1 < l) {
+        print(
+            'This is ith: ${state.board.tiles[i].index} and i+1th: ${state.board.tiles[i + 1].index}');
         //sum the number of the two tiles with same index and mark the tile as merged and skip the next iteration
-        final next = state.board.tiles[i + 1];
+        var next = state.board.tiles[i + 1];
         if (tile.nextIndex == next.nextIndex ||
             tile.index == next.nextIndex && tile.nextIndex == null) {
           value = tile.value + next.value;
@@ -117,7 +122,7 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
           var index = vert ? verticalOrder[tile.index] : tile.index,
               nextIndex = vert ? verticalOrder[next.index] : next.index;
           if (_inRange(index, nextIndex)) {
-            tilesList.add(next.copyWith());
+            tilesList.add(next.copyWith(nextIndex: tile.nextIndex));
             // Skip next iteration if next tile was already assigned nextIndex.
             i += 1;
             continue;
@@ -152,7 +157,8 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
     // Return immutable copy of the current tile with the new next index
     // which can be either be the top left index in the row
     // or the las tile's nextIndex/index + 1
-    return tile.copyWith(nextIndex: nextIndex);
+    return tile.copyWith(
+        nextIndex: vert ? verticalOrder.indexOf(nextIndex) : nextIndex);
   }
 
   bool _inRange(int index, int nextIndex) {

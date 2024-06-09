@@ -32,23 +32,19 @@ class Game extends StatelessWidget {
           // ignore: avoid_print
           print('You swiped left');
           context.read<BoardBloc>().add(MoveTile(SwipeDirection.left));
-          context.read<BoardBloc>().add(MergeTiles());
         },
         onSwipeRight: (offset) {
           // ignore: avoid_print
           print('You swiped right');
           context.read<BoardBloc>().add(MoveTile(SwipeDirection.right));
-          context.read<BoardBloc>().add(MergeTiles());
         },
         onSwipeDown: (offset) {
           print('You swiped down');
           context.read<BoardBloc>().add(MoveTile(SwipeDirection.down));
-          context.read<BoardBloc>().add(MergeTiles());
         },
         onSwipeUp: (offset) {
           print('You swiped up');
           context.read<BoardBloc>().add(MoveTile(SwipeDirection.up));
-          context.read<BoardBloc>().add(MergeTiles());
         },
         child: Scaffold(
           backgroundColor: backgroundColor,
