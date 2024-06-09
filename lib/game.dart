@@ -1,12 +1,12 @@
-import 'package:angs_2048/blocs/board_bloc/board_bloc.dart';
-import 'package:angs_2048/blocs/board_bloc/board_event.dart';
-import 'package:angs_2048/blocs/board_bloc/board_state.dart';
-import 'package:angs_2048/components/button.dart';
-import 'package:angs_2048/components/empty_board.dart';
-import 'package:angs_2048/components/score_board.dart';
-import 'package:angs_2048/components/tile_board.dart';
-import 'package:angs_2048/const/colors.dart';
-import 'package:angs_2048/models/board.dart';
+import '../blocs/board_bloc/board_bloc.dart';
+import '../blocs/board_bloc/board_event.dart';
+import '../blocs/board_bloc/board_state.dart';
+import '../components/button.dart';
+import '../components/empty_board.dart';
+import '../components/score_board.dart';
+import '../components/tile_board.dart';
+import '../const/colors.dart';
+import '../models/board.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swipe_detector/flutter_swipe_detector.dart';
@@ -32,6 +32,23 @@ class Game extends StatelessWidget {
           // ignore: avoid_print
           print('You swiped left');
           context.read<BoardBloc>().add(MoveTile(SwipeDirection.left));
+          context.read<BoardBloc>().add(MergeTiles());
+        },
+        onSwipeRight: (offset) {
+          // ignore: avoid_print
+          print('You swiped right');
+          context.read<BoardBloc>().add(MoveTile(SwipeDirection.right));
+          context.read<BoardBloc>().add(MergeTiles());
+        },
+        onSwipeDown: (offset) {
+          print('You swiped down');
+          context.read<BoardBloc>().add(MoveTile(SwipeDirection.down));
+          context.read<BoardBloc>().add(MergeTiles());
+        },
+        onSwipeUp: (offset) {
+          print('You swiped up');
+          context.read<BoardBloc>().add(MoveTile(SwipeDirection.up));
+          context.read<BoardBloc>().add(MergeTiles());
         },
         child: Scaffold(
           backgroundColor: backgroundColor,

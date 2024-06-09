@@ -18,3 +18,5 @@ class MoveTile extends BoardEvent {
   @override
   List<Object> get props => [direction];
 }
+
+class MergeTiles extends BoardEvent {}
