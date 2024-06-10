@@ -1,6 +1,8 @@
 import 'dart:math';
 
+import 'package:angs_2048/components/button.dart';
 import 'package:angs_2048/const/colors.dart';
+import 'package:angs_2048/managers/board_bloc/board_event.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -60,6 +62,31 @@ class TileBoardWidget extends StatelessWidget {
               ),
             );
           }),
+          if (board.over)
+            Positioned.fill(
+              child: Container(
+                color: overlayColor,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      board.won ? 'You win!' : 'Game over',
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 64.0,
+                      ),
+                    ),
+                    ButtonWidget(
+                      text: board.won ? 'New Game' : 'Try again...',
+                      onPressed: () {
+                        BlocProvider.of<BoardBloc>(context).add(StartNewGame());
+                      },
+                    )
+                  ],
+                ),
+              ),
+            )
         ],
       ),
     );

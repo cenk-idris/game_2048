@@ -142,7 +142,9 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                             Row(
                               children: [
                                 ButtonWidget(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    context.read<BoardBloc>().add(UndoGame());
+                                  },
                                   icon: Icons.undo,
                                 ),
                                 SizedBox(

@@ -22,6 +22,7 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
     on<MoveTile>(_onMoveTile);
     on<MergeTiles>(_onMergeTiles);
     on<EndRound>(_endRound);
+    on<UndoGame>(_undo);
   }
 
   @override
@@ -34,7 +35,22 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
     emit(BoardState(_newGame()));
   }
 
+  void _undo(UndoGame event, Emitter<BoardState> emit) {
+    if (state.board.undo != null) {
+      Board previousBoard = state.board.copyWith(
+        score: state.board.undo!.score,
+        best: state.board.undo!.best,
+        tiles: state.board.undo!.tiles,
+      );
+
+      emit(BoardState(previousBoard));
+    }
+  }
+
   void _onMoveTile(MoveTile event, Emitter<BoardState> emit) {
+    // Save the current state of the board
+    Board previousBoard = state.board.copyWith();
+
     // Implement move logic here
     List<Tile> movedList = move(event.direction);
     Board updatedBoard = state.board.copyWith(tiles: movedList);
@@ -42,7 +58,7 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
       //print('${tile.index} - ${tile.nextIndex}');
     }
 
-    emit(BoardState(updatedBoard));
+    emit(BoardState(updatedBoard.copyWith(undo: previousBoard)));
     for (var tile in state.board.tiles) {
       //print('${tile.index} - ${tile.nextIndex}');
     }
@@ -174,8 +190,18 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
   }
 
   Board _newGame() {
-    final bestScore = state.board.best + state.board.score;
-    final tiles = [random([])];
+    final bestScore = state.board.best;
+    final tiles = <Tile>[];
+    final usedIndexes = <int>[];
+
+    final rng = Random();
+    int numberOfTiles = rng.nextInt(2) + 3;
+
+    for (int i = 0; i < numberOfTiles; i++) {
+      tiles.add(random(usedIndexes));
+      usedIndexes.add(tiles.last.index);
+    }
+
     return Board.newGame(best: bestScore, tiles: tiles);
   }
 
@@ -189,7 +215,8 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
       i = rng.nextInt(16);
     } while (indexes.contains(i));
 
-    return Tile(Uuid().v4(), 2, i);
+    final randomTileValue = rng.nextBool() ? 2 : 4;
+    return Tile(Uuid().v4(), randomTileValue, i);
   }
 
   void _endRound(EndRound event, Emitter<BoardState> emit) {
@@ -258,8 +285,16 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
       }
     }
 
-    emit(BoardState(
-        state.board.copyWith(tiles: tilesList, over: gameOver, won: gameWon)));
+    final bool isNewHigh = state.board.score > state.board.best;
+    final int adjustedBestScore =
+        isNewHigh ? state.board.score : state.board.best;
+
+    emit(BoardState(state.board.copyWith(
+      tiles: tilesList,
+      over: gameOver,
+      won: gameWon,
+      best: adjustedBestScore,
+    )));
     print('Is game over: ${state.board.over}');
   }
 

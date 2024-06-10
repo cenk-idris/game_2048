@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../const/colors.dart';
+import '../managers/board_bloc/board_bloc.dart';
 
 class ScoreBoard extends StatelessWidget {
   ScoreBoard({super.key});
@@ -13,14 +15,14 @@ class ScoreBoard extends StatelessWidget {
         //TODO: connect the state notifier with the score widget
         Score(
           label: 'Score',
-          score: '0',
+          score: context.read<BoardBloc>().state.board.score.toString(),
         ),
         SizedBox(
           width: 8.0,
         ),
         Score(
           label: 'Best',
-          score: '0',
+          score: context.read<BoardBloc>().state.board.best.toString(),
         )
       ],
     );
