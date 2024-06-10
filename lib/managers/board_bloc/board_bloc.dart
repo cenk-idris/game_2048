@@ -109,7 +109,7 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
     }
 
     // If tiles got moved then generate a new tile at random position of the available positions on the board.
-    if (tilesMoved) {
+    if (tilesMoved && indexes.length < 16) {
       tilesList.add(random(indexes));
     }
     return state.board.copyWith(score: score, tiles: tilesList);
@@ -221,6 +221,7 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
 
   void _endRound(EndRound event, Emitter<BoardState> emit) {
     var gameOver = true, gameWon = false;
+    print('amount of tile: ${state.board.tiles.length}');
     List<Tile> tilesList = [];
 
     // If there is no more empty place on the board
@@ -235,7 +236,7 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
           gameWon = true;
         }
 
-        var x = i - (((i + 1) / 4).ceil() * 4 - 4);
+        var x = i % 4;
 
         // If tile can be merged with left tile then game is not lost.
         if (x > 0 && i - 1 >= 0) {
