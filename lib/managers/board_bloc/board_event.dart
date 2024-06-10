@@ -20,3 +20,5 @@ class MoveTile extends BoardEvent {
 }
 
 class MergeTiles extends BoardEvent {}
+
+class EndRound extends BoardEvent {}

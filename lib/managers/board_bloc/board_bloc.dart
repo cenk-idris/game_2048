@@ -1,5 +1,6 @@
 import 'dart:math';
-
+import 'package:angs_2048/managers/next_direction_cubit.dart';
+import 'package:angs_2048/managers/round_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swipe_detector/flutter_swipe_detector.dart';
 import 'package:uuid/uuid.dart';
@@ -9,20 +10,24 @@ import 'board_event.dart';
 import 'board_state.dart';
 
 class BoardBloc extends Bloc<BoardEvent, BoardState> {
+  final RoundCubit roundCubit;
+  final NextDirectionCubit nextDirectionCubit;
   // We will use this list to retrieve the right index when user swipes up/down
   // which will allow us to reuse most of the logic.
   final verticalOrder = [12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3];
 
-  BoardBloc() : super(BoardState(Board.newGame(best: 0, tiles: []))) {
+  BoardBloc({required this.roundCubit, required this.nextDirectionCubit})
+      : super(BoardState(Board.newGame(best: 0, tiles: []))) {
     on<StartNewGame>(_onStartNewGame);
     on<MoveTile>(_onMoveTile);
     on<MergeTiles>(_onMergeTiles);
+    on<EndRound>(_endRound);
   }
 
   @override
   void onChange(Change<BoardState> change) {
     super.onChange(change);
-    print(change.nextState.board.tiles.toString());
+    //print(change.nextState.board.tiles.toString());
   }
 
   void _onStartNewGame(StartNewGame event, Emitter<BoardState> emit) {
@@ -34,19 +39,19 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
     List<Tile> movedList = move(event.direction);
     Board updatedBoard = state.board.copyWith(tiles: movedList);
     for (var tile in state.board.tiles) {
-      print('${tile.index} - ${tile.nextIndex}');
+      //print('${tile.index} - ${tile.nextIndex}');
     }
 
     emit(BoardState(updatedBoard));
     for (var tile in state.board.tiles) {
-      print('${tile.index} - ${tile.nextIndex}');
+      //print('${tile.index} - ${tile.nextIndex}');
     }
-    add(MergeTiles());
+    //add(MergeTiles());
   }
 
   void _onMergeTiles(MergeTiles event, Emitter<BoardState> emit) {
     Board mergedBoard = merge();
-    emit(BoardState(merge()));
+    emit(BoardState(mergedBoard));
   }
 
   Board merge() {
@@ -61,8 +66,8 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
       var value = tile.value, merged = false;
 
       if (i + 1 < l) {
-        print(
-            'This is ith: ${state.board.tiles[i].index} and i+1th: ${state.board.tiles[i + 1].index}');
+        // print(
+        //     'This is ith: ${state.board.tiles[i].index} and i+1th: ${state.board.tiles[i + 1].index}');
         //sum the number of the two tiles with same index and mark the tile as merged and skip the next iteration
         var next = state.board.tiles[i + 1];
         if (tile.nextIndex == next.nextIndex ||
@@ -185,5 +190,92 @@ class BoardBloc extends Bloc<BoardEvent, BoardState> {
     } while (indexes.contains(i));
 
     return Tile(Uuid().v4(), 2, i);
+  }
+
+  void _endRound(EndRound event, Emitter<BoardState> emit) {
+    var gameOver = true, gameWon = false;
+    List<Tile> tilesList = [];
+
+    // If there is no more empty place on the board
+    if (state.board.tiles.length == 16) {
+      state.board.tiles.sort((a, b) => a.index.compareTo(b.index));
+
+      for (int i = 0, l = state.board.tiles.length; i < l; i++) {
+        var tile = state.board.tiles[i];
+
+        // if there is a tile with 2048 then the game is won.
+        if (tile.value == 2048) {
+          gameWon = true;
+        }
+
+        var x = i - (((i + 1) / 4).ceil() * 4 - 4);
+
+        // If tile can be merged with left tile then game is not lost.
+        if (x > 0 && i - 1 >= 0) {
+          final leftTile = state.board.tiles[i - 1];
+          if (tile.value == leftTile.value) {
+            gameOver = false;
+          }
+        }
+
+        // If tile can be merged with right tile then game is not lost.
+        if (x < 3 && i + 1 < l) {
+          final rightTile = state.board.tiles[i + 1];
+          if (tile.value == rightTile.value) {
+            gameOver = false;
+          }
+        }
+
+        // If tile can be merged with above tile then game is not lost.
+        if (i - 4 >= 0) {
+          final topTile = state.board.tiles[i - 4];
+          if (tile.value == topTile.value) {
+            gameOver = false;
+          }
+        }
+
+        // If tile can be merged with below tile then game is not lost.
+        if (i + 4 < l) {
+          final bottomTile = state.board.tiles[i + 4];
+          if (tile.value == bottomTile.value) {
+            gameOver = false;
+          }
+        }
+
+        //Set the tile merged: false
+        tilesList.add(tile.copyWith(merged: false));
+      }
+    } else {
+      // There is still a place on the board to add a tile so game is not lost.
+      gameOver = false;
+      for (var tile in state.board.tiles) {
+        // If there is a tile with 2048 then game is won.
+        if (tile.value == 2048) {
+          gameWon = true;
+        }
+        // Set the tile merged: false
+        tilesList.add(tile.copyWith(merged: false));
+      }
+    }
+
+    emit(BoardState(
+        state.board.copyWith(tiles: tilesList, over: gameOver, won: gameWon)));
+    print('Is game over: ${state.board.over}');
+  }
+
+  bool endRound() {
+    // End round
+    add(EndRound());
+    roundCubit.end();
+
+    // If player moved too fast before the current
+    // animation/transition finished, start the move for the next direction
+    var nextDirection = nextDirectionCubit.state;
+    if (nextDirection != null) {
+      add(MoveTile(nextDirection));
+      nextDirectionCubit.clear();
+      return true;
+    }
+    return false;
   }
 }

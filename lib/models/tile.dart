@@ -31,4 +31,16 @@ class Tile {
     final i = (index - (((index + 1) / 4).ceil() * 4 - 4));
     return (i * size) + (12.0 * (i + 1));
   }
+
+  double? getNextTop(double size) {
+    if (nextIndex == null) return null;
+    var i = ((nextIndex! + 1) / 4).ceil();
+    return ((i - 1) * size) + (12.0 * i);
+  }
+
+  double? getNextLeft(double size) {
+    if (nextIndex == null) return null;
+    var i = nextIndex! - (((nextIndex! + 1) / 4).ceil() * 4 - 4);
+    return (i * size) + (12.0 * (i + 1));
+  }
 }

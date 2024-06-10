@@ -1,20 +1,74 @@
-import '../blocs/board_bloc/board_bloc.dart';
-import '../blocs/board_bloc/board_event.dart';
-import '../blocs/board_bloc/board_state.dart';
+import '../managers/board_bloc/board_bloc.dart';
+import '../managers/board_bloc/board_event.dart';
+import '../managers/board_bloc/board_state.dart';
 import '../components/button.dart';
 import '../components/empty_board.dart';
 import '../components/score_board.dart';
 import '../components/tile_board.dart';
 import '../const/colors.dart';
-import '../models/board.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swipe_detector/flutter_swipe_detector.dart';
 
-class Game extends StatelessWidget {
+class Game extends StatefulWidget {
   Game({super.key});
 
+  @override
+  State<Game> createState() => _GameState();
+}
+
+class _GameState extends State<Game> with TickerProviderStateMixin {
+  // The controller used to move the tiles
+  late final AnimationController _moveController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 200),
+  )..addStatusListener((status) {
+      print('move animation status: ${AnimationStatus.completed}');
+      // When the movement finishes merge the tiles
+      // and start the scale animation which gives the pop effect
+      if (status == AnimationStatus.completed) {
+        context.read<BoardBloc>().add(MergeTiles());
+        _scaleController.forward(from: 0.0);
+      }
+    });
+
+  // The curve animation for the move animation controller.
+  late final CurvedAnimation _moveAnimation = CurvedAnimation(
+    parent: _moveController,
+    curve: Curves.easeInOut,
+  );
+
+  // The controller used to show a popup effect when the tiles get merged
+  late final AnimationController _scaleController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 200),
+  )..addStatusListener((status) {
+      // When the scale animation finishes end the round and if there is a queued movement start the move controller again for the next direction.
+      print('move animation status: ${AnimationStatus.completed}');
+      if (status == AnimationStatus.completed) {
+        if (context.read<BoardBloc>().endRound()) {
+          _moveController.forward(from: 0.0);
+        }
+      }
+    });
+
+  late final CurvedAnimation _scaleAnimation = CurvedAnimation(
+    parent: _scaleController,
+    curve: Curves.easeInOut,
+  );
+
   final FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    // Dispose animations
+    _moveAnimation.dispose();
+    _scaleAnimation.dispose();
+    _moveController.dispose();
+    _scaleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,19 +86,23 @@ class Game extends StatelessWidget {
           // ignore: avoid_print
           print('You swiped left');
           context.read<BoardBloc>().add(MoveTile(SwipeDirection.left));
+          _moveController.forward(from: 0.0);
         },
         onSwipeRight: (offset) {
           // ignore: avoid_print
           print('You swiped right');
           context.read<BoardBloc>().add(MoveTile(SwipeDirection.right));
+          _moveController.forward(from: 0.0);
         },
         onSwipeDown: (offset) {
           print('You swiped down');
           context.read<BoardBloc>().add(MoveTile(SwipeDirection.down));
+          _moveController.forward(from: 0.0);
         },
         onSwipeUp: (offset) {
           print('You swiped up');
           context.read<BoardBloc>().add(MoveTile(SwipeDirection.up));
+          _moveController.forward(from: 0.0);
         },
         child: Scaffold(
           backgroundColor: backgroundColor,
@@ -111,7 +169,10 @@ class Game extends StatelessWidget {
                   Stack(
                     children: [
                       EmptyBoardWidget(),
-                      TileBoardWidget(),
+                      TileBoardWidget(
+                        moveAnimation: _moveAnimation,
+                        scaleAnimation: _scaleAnimation,
+                      ),
                     ],
                   )
                 ],

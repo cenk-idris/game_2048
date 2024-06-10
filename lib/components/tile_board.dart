@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:math';
 
 import 'package:angs_2048/const/colors.dart';
@@ -6,10 +5,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../blocs/board_bloc/board_bloc.dart';
+import '../managers/board_bloc/board_bloc.dart';
+import 'animated_tile.dart';
 
 class TileBoardWidget extends StatelessWidget {
-  TileBoardWidget({super.key});
+  final CurvedAnimation moveAnimation;
+  final CurvedAnimation scaleAnimation;
+
+  TileBoardWidget(
+      {super.key, required this.moveAnimation, required this.scaleAnimation});
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +35,12 @@ class TileBoardWidget extends StatelessWidget {
         children: [
           ...List.generate(board.tiles.length, (i) {
             final tile = board.tiles[i];
-            return Positioned(
+            return AnimatedTile(
               key: ValueKey(tile.id),
-              top: tile.getTop(tileSize),
-              left: tile.getLeft(tileSize),
+              tile: tile,
+              moveAnimation: moveAnimation,
+              scaleAnimation: scaleAnimation,
+              size: tileSize,
               child: Container(
                 width: tileSize,
                 height: tileSize,
