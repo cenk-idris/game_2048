@@ -1,5 +1,7 @@
 # Twenty Forty Eight
 
+![2048 game gif](./assets/2048.gif)
+
 Popular mobile game '2048', moving tiles and trying to merge the tiles with same values and get highest score before grid gets full.
 Learned about Flutter Animations and BLoC state management.
 
@@ -15,13 +17,6 @@ Learned about Flutter Animations and BLoC state management.
 - Game stop when no legal moves are possible and it allow the user to restart 
 - Game include a functionality to track and display the current and best scores
 - Game include a functionality to undo previous move.
-
-
-## Visual
-
-| Homescreen                                        | Questionscreen                                            | Scorescreen                                         |
-|---------------------------------------------------|-----------------------------------------------------------|-----------------------------------------------------|
-| ![Home screen of QuizAPP](/assets/homescreen.jpg) | ![Question screen of QuizApp](/assets/questionscreen.jpg) | ![Score screen of QuizApp](/assets/scorescreen.jpg) |
 
 ## Run Locally
 
