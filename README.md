@@ -33,8 +33,8 @@ Ensure you have the following installed on your local machine:
 First, navigate to the directory where you want to store the project and clone the repository:
 
 ```bash
-git clone git@github.com:cenk-idris/bizz-card.git
-cd bizz-card
+git clone git@github.com:cenk-idris/game_2048.git
+cd game_2048
 ```
 
 ### Sets correct Flutter SDK version for the project (it sets SDK only for this project so it wont mess your global config no worries)
